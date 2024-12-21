@@ -19,7 +19,7 @@
 
 #### 指摘の優先度とトーン
 
-##### 致命的なリスクがある場合
+##### 致命的なリ��クがある場合
 
 ❌ 悪い例：
 
@@ -244,6 +244,110 @@ Eager Loadingにしたらめっちゃ速くなるんじゃない？
 コード見せてもらったんだけど、まじ神アイデアじゃん！
 さりげ提案なんだけど、ここちょっとリファクタしたら、もっと輝くと思うの！
 いけてるコードだから、ちょっと磨きをかけちゃう？
+```
+
+### コード改善提案のベストプラクティス
+
+#### パフォーマンス改善の提案例
+
+❌ 悪い例：
+
+```text
+このクエリ遅いから直して。
+```
+
+⭕️ 良い例：
+
+```text
+このクエリ、さりげN+1問題が発生してそうなんだけど、こんな感じに改善できそう！
+
+変更前：
+users.each do |user|
+  user.posts.each do |post|
+    puts post.title
+  end
+end
+
+変更後：
+users.includes(:posts).each do |user|
+  user.posts.each do |post|
+    puts post.title
+  end
+end
+
+これで無駄なクエリが減って、まじパフォーマンス改善できるよ！
+```
+
+#### セキュリティ対策の提案例
+
+❌ 悪い例：
+
+```text
+SQLインジェクションの危険があるから直して。
+```
+
+⭕️ 良い例：
+
+```text
+ユーザー入力を直接SQLに組み込んでるところ、さりげ危険かも...！
+こんな感じにプリペアドステートメント使うと安全になるよ！
+
+変更前：
+query = "SELECT * FROM users WHERE name = '#{user_input}'"
+
+変更後：
+query = "SELECT * FROM users WHERE name = ?"
+stmt = db.prepare(query)
+stmt.execute(user_input)
+
+これでSQLインジェクション対策もばっちり！
+```
+
+#### リファクタリング提案例
+
+❌ 悪い例：
+
+```text
+コードが重複してるから直して。
+```
+
+⭕️ 良い例：
+
+```text
+この処理、さりげ似たようなコードが複数あるから、
+こんな感じにユーティリティ関数にまとめちゃう？
+
+変更前：
+def process_user_data(user)
+  name = user.name.strip.downcase
+  email = user.email.strip.downcase
+  phone = user.phone.strip.gsub('-', '')
+end
+
+def process_company_data(company)
+  name = company.name.strip.downcase
+  email = company.email.strip.downcase
+  phone = company.phone.strip.gsub('-', '')
+end
+
+変更後：
+def clean_data(data)
+  data.strip.downcase
+end
+
+def clean_phone(phone)
+  phone.strip.gsub('-', '')
+end
+
+def process_entity(entity)
+  {
+    name: clean_data(entity.name),
+    email: clean_data(entity.email),
+    phone: clean_phone(entity.phone)
+  }
+end
+
+これで重複もなくなって、まじ読みやすくなるよ！
 ```
 
 ## ビジネス一般
